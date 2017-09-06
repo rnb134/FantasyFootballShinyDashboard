@@ -1,5 +1,20 @@
 library('shiny')
 library('shinydashboard')
+library('readxl')
+
+#Import Data Step
+League <- read_excel("FFData_Sep5.xlsx", sheet = "League")
+Top3Place <- read_excel("FFData_Sep5.xlsx", sheet = "Top3Place")
+Top3Draft <- read_excel("FFData_Sep5.xlsx", sheet = "Top3Draft")
+AllStats <- read_excel("FFData_Sep5.xlsx", sheet = "All")
+
+# Some PreProcessing
+AllStats$`Avg Pts For`<- as.integer(AllStats$`Avg Pts For`)
+AllStats$`Avg Pts Against`<- as.integer(AllStats$`Avg Pts Against`)
+AllStats$`Avg Pt Diff` <- as.integer(AllStats$`Avg Pt Diff`)
+AllStats$`Win Percent` <- sprintf("%.0f %%",AllStats$`Win Percent`*100)
+AllStats$`Pts For` <- formatC(AllStats$`Pts For`,digits = 0, format = "d", big.mark = ",")
+AllStats$`Pts Against` <- formatC(AllStats$`Pts Against`,digits = 0, format = "d", big.mark = ",")
 
 #configure Header
 dbHeader <- dashboardHeader(title = "Header Title")
