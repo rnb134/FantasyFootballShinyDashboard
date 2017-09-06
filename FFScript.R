@@ -12,9 +12,12 @@ AllStats <- read_excel("FFData_Sep5.xlsx", sheet = "All")
 AllStats$`Avg Pts For`<- as.integer(AllStats$`Avg Pts For`)
 AllStats$`Avg Pts Against`<- as.integer(AllStats$`Avg Pts Against`)
 AllStats$`Avg Pt Diff` <- as.integer(AllStats$`Avg Pt Diff`)
+<<<<<<< HEAD
 AllStats$`Win Percent` <- sprintf("%.0f %%",AllStats$`Win Percent`*100)
 AllStats$`Pts For` <- formatC(AllStats$`Pts For`,digits = 0, format = "d", big.mark = ",")
 AllStats$`Pts Against` <- formatC(AllStats$`Pts Against`,digits = 0, format = "d", big.mark = ",")
+=======
+>>>>>>> 5c7b4875a7c22ebcf2bef4655ecbb5440386cd37
 
 #configure Header
 dbHeader <- dashboardHeader(title = "Header Title")
