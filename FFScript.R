@@ -1,14 +1,15 @@
 library('shiny')
 library('shinydashboard')
 library('readxl')
+library('ggplot2')
 
-#Import Data Step
+#Import Data Step ********************************************************************************************************************************************
 League <- read_excel("FFData_Sep5.xlsx", sheet = "League")
 Top3Place <- read_excel("FFData_Sep5.xlsx", sheet = "Top3Place")
 Top3Draft <- read_excel("FFData_Sep5.xlsx", sheet = "Top3Draft")
 AllStats <- read_excel("FFData_Sep5.xlsx", sheet = "All")
 
-# Some PreProcessing
+# Some PreProcessing ******************************************************************************************************************************************** 
 AllStats$`Avg Pts For`<- as.integer(AllStats$`Avg Pts For`)
 AllStats$`Avg Pts Against`<- as.integer(AllStats$`Avg Pts Against`)
 AllStats$`Avg Pt Diff` <- as.integer(AllStats$`Avg Pt Diff`)
@@ -16,24 +17,45 @@ AllStats$`Win Percent` <- sprintf("%.0f %%",AllStats$`Win Percent`*100)
 AllStats$`Pts For` <- formatC(AllStats$`Pts For`,digits = 0, format = "d", big.mark = ",")
 AllStats$`Pts Against` <- formatC(AllStats$`Pts Against`,digits = 0, format = "d", big.mark = ",")
 
+League$Year <- as.integer(League$Year)
+
+
+#BUILD THE UI********************************************************************************************************************************************
 
 #configure Header
-dbHeader <- dashboardHeader(title = "Header Title")
+dbHeader <- dashboardHeader(title = "13 Glorious Years of Fantasy Football", titleWidth = 450)
 
 
 #configure Sidebar
 dbSidebar <- dashboardSidebar(
   sidebarMenu(
-    menuItem("Dashboard",tabName = 'db1', icon = icon("dashboard")),
-    menuItem("Widgets", tabName = 'db2', icon = icon("th"))
+    menuItem("League Overview",tabName = 'db1', icon = icon("dashboard")),
+    menuItem("The Original 5", tabName = 'db2', icon = icon("th"))
   )  
 )
 
 #configure body
 dbBody <- dashboardBody(
   tabItems(
-    tabItem(tabName ='db1',h1("1st Tab")),
-    tabItem(tabName = 'db2',h2("new Text"))
+      #FirstTab Open
+    tabItem(tabName ='db1',h1("League Overview"),
+                fluidPage(fluidRow(box(tableOutput('LeagueOverview'), title = "2004 - 2016 Leagues",solidHeader = TRUE, status = 'primary', width = 6),
+                                   box(plotOutput('LeagueWinners'),title = 'League Winners by Frequency', solidHeader = TRUE, status = 'primary', width = 6)
+                    
+                    
+                )#closeFluidRow    
+                )#closeFluidPage
+            
+            #FirstTabClose
+            ),
+    
+    #SecondTab Open
+    tabItem(tabName = 'db2',h2("The Big 5")
+            
+            
+            
+           
+            ) #SecondTabClose
     
   )
   
@@ -43,10 +65,20 @@ dbBody <- dashboardBody(
 #pass elements into dashboardPage function and pass to UI Variable
 ui <- dashboardPage(dbHeader,dbSidebar,dbBody)
 
-#server Function
+#SERVER FUNCTION********************************************************************************************************************************************
 server <- function(input, output){
+    
+    #League Table
+    output$LeagueOverview <- renderTable(League, align = 'c', width = 'auto')
+    
+    #League Graph
+    output$LeagueWinners <- renderPlot(
+            ggplot(League, aes(x=League$`Winner (owner)`)) + geom_bar(), width = 'auto'
+        
+    )#closeRenderplot
+    
   
 }
 
-#build ShinyApp
+#BUILD THE APP *******************************************************************************************************************************************
 shinyApp (ui,server)
