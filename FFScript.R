@@ -73,7 +73,10 @@ server <- function(input, output){
     
     #League Graph
     output$LeagueWinners <- renderPlot(
-            ggplot(League, aes(x=League$`Winner (owner)`)) + geom_bar(), width = 'auto'
+        ggplot(League, aes(x=reorder(League$`Winner (owner)`,League$`Winner (owner)`, function(x)-length(x)))) + geom_bar(color = "blue", fill = "gray") + labs(x ="",y="")
+        +theme(axis.text.x = element_text(size = 16, angle = 45), panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank()) +
+        geom_text(stat='count', aes(label = ..count..), vjust =-1)
+        , width = 'auto'
         
     )#closeRenderplot
     
