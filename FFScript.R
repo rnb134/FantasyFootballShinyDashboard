@@ -2,6 +2,8 @@ library('shiny')
 library('shinydashboard')
 library('readxl')
 library('ggplot2')
+library('dplyr')
+library('magrittr')
 
 #Import Data Step ********************************************************************************************************************************************
 League <- read_excel("FFData_Sep5.xlsx", sheet = "League")
@@ -13,9 +15,9 @@ AllStats <- read_excel("FFData_Sep5.xlsx", sheet = "All")
 g <- subset(Top3Draft,Top3Draft$`Draft Number`==1)
 
 # Some PreProcessing ******************************************************************************************************************************************** 
-AllStats$`Avg Pts For`<- as.integer(AllStats$`Avg Pts For`)
-AllStats$`Avg Pts Against`<- as.integer(AllStats$`Avg Pts Against`)
-AllStats$`Avg Pt Diff` <- as.integer(AllStats$`Avg Pt Diff`)
+AllStats$`Avg Pts For`<- formatC(AllStats$`Avg Pts For`,digits = 0, format = "d", big.mark = ",")
+AllStats$`Avg Pts Against`<- formatC(AllStats$`Avg Pts Against`,digits = 0, format = "d", big.mark = ",")
+AllStats$`Avg Pt Diff` <- formatC(AllStats$`Avg Pt Diff`,digits = 0, format = "d", big.mark = ",")
 AllStats$`Win Percent` <- sprintf("%.0f %%",AllStats$`Win Percent`*100)
 AllStats$`Pts For` <- formatC(AllStats$`Pts For`,digits = 0, format = "d", big.mark = ",")
 AllStats$`Pts Against` <- formatC(AllStats$`Pts Against`,digits = 0, format = "d", big.mark = ",")
@@ -24,6 +26,15 @@ League$Year <- as.integer(League$Year)
 
 Top3Draft$`Draft Number` <- as.integer(Top3Draft$`Draft Number`)
 
+
+#################################################Create Add'l Tables###################################################################################
+   #table for total record
+
+  totalRecordTable <-  select(AllStats,Owner, Wins, Losses, Ties) %>% group_by(Owner) %>%summarise_all(funs(sum)) %>% arrange(desc(Wins))
+    totalRecordTable$Wins<- formatC(totalRecordTable$Wins,digits = 0, format = "g")
+    totalRecordTable$Losses<- formatC(totalRecordTable$Losses,digits = 0, format = "d")
+    totalRecordTable$Ties<- formatC(totalRecordTable$Ties,digits = 0, format = "d")
+    
 
 #BUILD THE UI********************************************************************************************************************************************
 
@@ -60,11 +71,15 @@ dbBody <- dashboardBody(
             ),
     
     #SecondTab Open
-    tabItem(tabName = 'db2',h2("The Big 5")
+    tabItem(tabName = 'db2',h2("The Original 5"),
+            fluidPage(fluidRow(box(tableOutput('TotalRecord'), title = 'Record since 2004', solidHeader = TRUE, status ='success' )
+                
+                
+            )# close fluidRow
+                
+                
+            )#close 2nd fluid page
             
-            
-            
-           
             ) #SecondTabClose
     
   )
@@ -77,6 +92,8 @@ ui <- dashboardPage(dbHeader,dbSidebar,dbBody)
 
 #SERVER FUNCTION********************************************************************************************************************************************
 server <- function(input, output){
+   
+    ################################# TAB #1 SERVER#####################################################################################
     
     #League Table
     output$LeagueOverview <- renderTable(League, align = 'c', width = 'auto')
@@ -108,6 +125,13 @@ server <- function(input, output){
         , width = 'auto', height = 'auto'
         
     )#closeRenderplot
+    
+    ################################# TAB #2 SERVER#####################################################################################
+    
+    #League Table
+    output$TotalRecord <- renderTable(select(AllStats,Owner, Wins, Losses, Ties) %>% group_by(Owner) %>%summarise_all(funs(sum)) %>% arrange(desc(Wins)), align = 'c', width = 'auto', digits = 0)
+    
+    
 }
 
 #BUILD THE APP *******************************************************************************************************************************************
