@@ -30,10 +30,12 @@ Top3Draft$`Draft Number` <- as.integer(Top3Draft$`Draft Number`)
 #################################################Create Add'l Tables###################################################################################
    #table for total record
 
-  totalRecordTable <-  select(AllStats,Owner, Wins, Losses, Ties) %>% group_by(Owner) %>%summarise_all(funs(sum)) %>% arrange(desc(Wins))
-    totalRecordTable$Wins<- formatC(totalRecordTable$Wins,digits = 0, format = "g")
-    totalRecordTable$Losses<- formatC(totalRecordTable$Losses,digits = 0, format = "d")
-    totalRecordTable$Ties<- formatC(totalRecordTable$Ties,digits = 0, format = "d")
+  totalRecordTable <-  select(AllStats,Owner, Wins, Losses, Ties) %>% group_by(Owner) %>%summarise_all(funs(sum)) %>% arrange(desc(Wins)) %>% mutate('Win %' = sprintf("%.1f %%",totalRecordTable$Wins/(totalRecordTable$Wins + totalRecordTable$Losses + totalRecordTable$Ties)*100))
+    #totalRecordTable$Wins<- formatC(totalRecordTable$Wins,digits = 0, format = "g")
+    #totalRecordTable$Losses<- formatC(totalRecordTable$Losses,digits = 0, format = "d")
+    #totalRecordTable$Ties<- formatC(totalRecordTable$Ties,digits = 0, format = "d")
+    
+    #totalRecordTable %>% mutate('Win %' = sprintf("%.1f %%",totalRecordTable$Wins/(totalRecordTable$Wins + totalRecordTable$Losses + totalRecordTable$Ties)*100))
     
 
 #BUILD THE UI********************************************************************************************************************************************
@@ -72,7 +74,9 @@ dbBody <- dashboardBody(
     
     #SecondTab Open
     tabItem(tabName = 'db2',h2("The Original 5"),
-            fluidPage(fluidRow(box(tableOutput('TotalRecord'), title = 'Record since 2004', solidHeader = TRUE, status ='success' )
+            fluidPage(fluidRow(column(width = 6, box(tableOutput('TotalRecord'), title = 'Record since 2004', solidHeader = TRUE, status ='success' )),
+                               column(width = 6,valueBox("20","TEST"))
+                            
                 
                 
             )# close fluidRow
@@ -129,8 +133,8 @@ server <- function(input, output){
     ################################# TAB #2 SERVER#####################################################################################
     
     #League Table
-    output$TotalRecord <- renderTable(select(AllStats,Owner, Wins, Losses, Ties) %>% group_by(Owner) %>%summarise_all(funs(sum)) %>% arrange(desc(Wins)), align = 'c', width = 'auto', digits = 0)
-    
+    #output$TotalRecord <- renderTable(select(AllStats,Owner, Wins, Losses, Ties,) %>% group_by(Owner) %>%summarise_all(funs(sum)) %>% arrange(desc(Wins)), align = 'c', width = 'auto', digits = 0)
+    output$TotalRecord <- renderTable(totalRecordTable, align = 'c', digits = 0)
     
 }
 
