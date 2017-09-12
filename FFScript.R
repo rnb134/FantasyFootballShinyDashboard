@@ -9,6 +9,9 @@ Top3Place <- read_excel("FFData_Sep5.xlsx", sheet = "Top3Place")
 Top3Draft <- read_excel("FFData_Sep5.xlsx", sheet = "Top3Draft")
 AllStats <- read_excel("FFData_Sep5.xlsx", sheet = "All")
 
+#get all #1 draft picks
+g <- subset(Top3Draft,Top3Draft$`Draft Number`==1)
+
 # Some PreProcessing ******************************************************************************************************************************************** 
 AllStats$`Avg Pts For`<- as.integer(AllStats$`Avg Pts For`)
 AllStats$`Avg Pts Against`<- as.integer(AllStats$`Avg Pts Against`)
@@ -18,6 +21,8 @@ AllStats$`Pts For` <- formatC(AllStats$`Pts For`,digits = 0, format = "d", big.m
 AllStats$`Pts Against` <- formatC(AllStats$`Pts Against`,digits = 0, format = "d", big.mark = ",")
 
 League$Year <- as.integer(League$Year)
+
+Top3Draft$`Draft Number` <- as.integer(Top3Draft$`Draft Number`)
 
 
 #BUILD THE UI********************************************************************************************************************************************
@@ -44,8 +49,12 @@ dbBody <- dashboardBody(
                     
                     
                 ),#close1stFluidRow
-                          fluidRow(box(plotOutput('Top3Finishes'), title = '# of Top 3 Finishes', solidHeader = TRUE, status = 'primary', width = 6))
-                )#closeFluidPage
+                          fluidRow(box(plotOutput('Top3Finishes'), title = '# of Top 3 Finishes', solidHeader = TRUE, status = 'primary', width = 6),
+                                   box(plotOutput('Top3DraftPicks'), title ='Top Draft Picks since 2004', solidHeader = TRUE, status ='primary', width = 6, background = 'light-blue'))
+
+               
+                
+                 )#closeFluidPage
             
             #FirstTabClose
             ),
@@ -90,6 +99,15 @@ server <- function(input, output){
     
       
     )#close Render Plot
+    
+    #Top3 Draft Picks Graph
+    output$Top3DraftPicks <- renderPlot(
+        ggplot(g, aes(x=reorder(g$`Draft Pick`,g$`Draft Pick`, function(x)-length(x)))) + geom_bar(color = "blue", fill = "gray") + labs(x ="",y="")
+        +theme(axis.text.x = element_text(size = 12, angle = 45), panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank()) +
+            geom_text(stat='count', aes(label = ..count..), vjust =-1) + scale_y_discrete()
+        , width = 'auto', height = 'auto'
+        
+    )#closeRenderplot
 }
 
 #BUILD THE APP *******************************************************************************************************************************************
