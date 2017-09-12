@@ -40,10 +40,11 @@ dbBody <- dashboardBody(
       #FirstTab Open
     tabItem(tabName ='db1',h1("League Overview"),
                 fluidPage(fluidRow(box(tableOutput('LeagueOverview'), title = "2004 - 2016 Leagues",solidHeader = TRUE, status = 'primary', width = 6),
-                                   box(plotOutput('LeagueWinners'),title = 'League Winners by Frequency', solidHeader = TRUE, status = 'primary', width = 6)
+                                   box(plotOutput('LeagueWinners'),title = 'League Winners by Frequency', solidHeader = TRUE, status = 'primary', width = 6, background = 'light-blue')
                     
                     
-                )#closeFluidRow    
+                ),#close1stFluidRow
+                          fluidRow(box(plotOutput('Top3Finishes'), title = '# of Top 3 Finishes', solidHeader = TRUE, status = 'primary', width = 6))
                 )#closeFluidPage
             
             #FirstTabClose
@@ -70,17 +71,25 @@ server <- function(input, output){
     
     #League Table
     output$LeagueOverview <- renderTable(League, align = 'c', width = 'auto')
+  #output$LeagueOverview <- renderDataTable(League, options = list(ScrollY = '800px', pageLength = 1000))
     
     #League Graph
     output$LeagueWinners <- renderPlot(
         ggplot(League, aes(x=reorder(League$`Winner (owner)`,League$`Winner (owner)`, function(x)-length(x)))) + geom_bar(color = "blue", fill = "gray") + labs(x ="",y="")
         +theme(axis.text.x = element_text(size = 16, angle = 45), panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank()) +
-        geom_text(stat='count', aes(label = ..count..), vjust =-1)
-        , width = 'auto'
+        geom_text(stat='count', aes(label = ..count..), vjust =-1) + scale_y_discrete()
+        , width = 'auto', height = 'auto'
         
     )#closeRenderplot
     
-  
+    #Top3Finishes Graph
+    output$Top3Finishes <- renderPlot(ggplot(Top3Place, aes(x = reorder(Top3Place$'Team Owner', Top3Place$'Team Owner', function(x) length(x)))) + 
+                              geom_bar(aes(fill = as.factor(Top3Place$Place)))  + coord_flip()
+                    + labs(x="", y = "" ) + theme(panel.background = element_blank()) + geom_text(stat = 'count', aes(label = ..count..), hjust = -2) 
+                     + guides( fill = guide_legend(title = "1st, 2nd, or 3rd", title.hjust = 2))
+    
+      
+    )#close Render Plot
 }
 
 #BUILD THE APP *******************************************************************************************************************************************
