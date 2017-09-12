@@ -2,7 +2,6 @@ library('shiny')
 library('shinydashboard')
 library('readxl')
 library('ggplot2')
-library('caret')
 
 #Import Data Step ********************************************************************************************************************************************
 League <- read_excel("FFData_Sep5.xlsx", sheet = "League")
@@ -95,5 +94,3 @@ server <- function(input, output){
 
 #BUILD THE APP *******************************************************************************************************************************************
 shinyApp (ui,server)
-
-
