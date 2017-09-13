@@ -30,7 +30,8 @@ Top3Draft$`Draft Number` <- as.integer(Top3Draft$`Draft Number`)
 #################################################Create Add'l Tables###################################################################################
    #table for total record
 
-  totalRecordTable <-  select(AllStats,Owner, Wins, Losses, Ties) %>% group_by(Owner) %>%summarise_all(funs(sum)) %>% arrange(desc(Wins)) %>% mutate('Win %' = sprintf("%.1f %%",totalRecordTable$Wins/(totalRecordTable$Wins + totalRecordTable$Losses + totalRecordTable$Ties)*100))
+  totalRecordTable <-  select(AllStats,Owner, Wins, Losses, Ties) %>% group_by(Owner) %>%summarise_all(funs(sum)) %>% arrange(desc(Wins))
+totalRecordTableWithWin <- totalRecordTable %>% mutate(Win_Percent = sprintf("%.1f %%",totalRecordTable$Wins/(totalRecordTable$Wins + totalRecordTable$Losses + totalRecordTable$Ties)*100))
     #totalRecordTable$Wins<- formatC(totalRecordTable$Wins,digits = 0, format = "g")
     #totalRecordTable$Losses<- formatC(totalRecordTable$Losses,digits = 0, format = "d")
     #totalRecordTable$Ties<- formatC(totalRecordTable$Ties,digits = 0, format = "d")
@@ -74,10 +75,16 @@ dbBody <- dashboardBody(
     
     #SecondTab Open
     tabItem(tabName = 'db2',h2("The Original 5"),
-            fluidPage(fluidRow(column(width = 6, box(tableOutput('TotalRecord'), title = 'Record since 2004', solidHeader = TRUE, status ='success' )),
-                               column(width = 6,valueBox("20","TEST"))
+            fluidPage(fluidRow(column(3, box(tableOutput('TotalRecord'), title = 'Record since 2004', solidHeader = TRUE, status ='success',width = 12 )),
+                              column(9,infoBox("Jgord","52.6% Win Rate", subtitle = "91-79-3", icon = icon('thumbs-up'), color ='light-blue'),
+                                     infoBox("Jose","52.6% Win Rate", subtitle = "91-81-1", icon = icon('thumbs-up'), color ='lime'),
+                                     infoBox("Lip","50.9% Win Rate", subtitle = "88-84-1", icon = icon('thumbs-up'), color ='orange'),
+                                     infoBox("Z","49.7% Win Rate", subtitle = "86-84-3", icon = icon('thumbs-down'), color ='fuchsia'),
+                                     infoBox("B","45.1% Win Rate", subtitle = "78-92-1", icon = icon('thumbs-down'), color ='aqua')
+                                     
+                                     )#end column 9
                             
-                
+                #div(style = "height:50px;width:100%;background-color: #999999;border-style: solid;border-color: #000000"),
                 
             )# close fluidRow
                 
@@ -134,7 +141,7 @@ server <- function(input, output){
     
     #League Table
     #output$TotalRecord <- renderTable(select(AllStats,Owner, Wins, Losses, Ties,) %>% group_by(Owner) %>%summarise_all(funs(sum)) %>% arrange(desc(Wins)), align = 'c', width = 'auto', digits = 0)
-    output$TotalRecord <- renderTable(totalRecordTable, align = 'c', digits = 0)
+    output$TotalRecord <- renderTable(totalRecordTableWithWin, align = 'c', digits = 0)
     
 }
 
