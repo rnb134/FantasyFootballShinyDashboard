@@ -86,7 +86,9 @@ dbBody <- dashboardBody(
                             
                 #div(style = "height:50px;width:100%;background-color: #999999;border-style: solid;border-color: #000000"),
                 
-            )# close fluidRow
+            ),# close fluidRow
+            
+                    fluidRow(box(plotOutput("Orig5Place"),title ='A distribution of Final Rankings', solidHeader = TRUE, status = 'success'))
                 
                 
             )#close 2nd fluid page
@@ -143,7 +145,11 @@ server <- function(input, output){
     #output$TotalRecord <- renderTable(select(AllStats,Owner, Wins, Losses, Ties,) %>% group_by(Owner) %>%summarise_all(funs(sum)) %>% arrange(desc(Wins)), align = 'c', width = 'auto', digits = 0)
     output$TotalRecord <- renderTable(totalRecordTableWithWin, align = 'c', digits = 0)
     
-}
+    output$Orig5Place <- renderPlot(
+      ggplot(test, aes(x=Place, y=Owner, fill= Owner)) + geom_joy(stat = 'binline',binwidth=1,scale=0.9) + theme_joy() + scale_fill_cyclical(values = c(" navy blue", "light blue"))+ labs(x="Final Ranking")+ theme(axis.title.y = element_blank(), axis.title.x = element_text(family = 'Calibri', size = 12)) + scale_x_discrete(limits = seq(1,12,1))
+     
+        )#close renderplot
+      }
 
 #BUILD THE APP *******************************************************************************************************************************************
 shinyApp (ui,server)
