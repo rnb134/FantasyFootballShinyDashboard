@@ -16,14 +16,24 @@ AllStats <- read_excel("FFData_Sep5.xlsx", sheet = "All")
 g <- subset(Top3Draft,Top3Draft$`Draft Number`==1)
 
 #########Some PreProcessing ********************************************************************************************************************************************
-AllStats$Avg_Pts_For<- formatC(AllStats$Avg_Pts_For,digits = 0, format = "d", big.mark = ",")
+
+#AllStats$Pts_For <- as.numeric(AllStats$Pts_For)
+
+#AllStats$Pts_For <- format(round(AllStats$Pts_For,0),nsmall = 0, format= "d", big.mark = ",")
+
+AllStats$Pts_For <- as.integer(as.character(AllStats$Pts_For))
+AllStats$Pt_Diff <- as.integer(AllStats$Pt_Diff)
+
+AllStats$Avg_Pts_For<- formatC(AllStats$Avg_Pts_For,digits = 0, format = "f", big.mark = ",")
 AllStats$Avg_Pts_Against<- formatC(AllStats$Avg_Pts_Against,digits = 0, format = "d", big.mark = ",")
 AllStats$Avg_Pt_Diff <- formatC(AllStats$Avg_Pt_Diff,digits = 0, format = "d", big.mark = ",")
 AllStats$Win_Percent <- sprintf("%.0f %%",AllStats$Win_Percent*100)
-AllStats$Pts_For <- formatC(AllStats$Pts_For,digits = 0, format = "d", big.mark = ",")
+#AllStats$Pts_For <- formatC(AllStats$Pts_For,digits = 0, format = "d", big.mark = ",")
 AllStats$Pts_Against <- formatC(AllStats$Pts_Against,digits = 0, format = "d", big.mark = ",")
 
 League$Year <- as.integer(League$Year)
+
+
 
 Top3Draft$`Draft Number` <- as.integer(Top3Draft$`Draft Number`)
 
@@ -31,6 +41,7 @@ Top3Draft$`Draft Number` <- as.integer(Top3Draft$`Draft Number`)
 gamesPlayed <- 173
 
 
+str(AllStats)
 
 #################################################Create Add'l Tables###################################################################################
    #table for total record
@@ -40,8 +51,10 @@ totalRecordTableWithWin <- totalRecordTable %>% mutate(Win_Percent = sprintf("%.
    
    #per game metrics
 
- #perGameDF <-  select(AllStats,Owner,Pts_For,Pt_Diff) %>% group_by(Owner) %>% summarise_all(function(x) sum(x))
-                                                                                            
+  perGameDF <-  select(AllStats,Owner,Pts_For,Pt_Diff) %>% group_by(Owner)  %>% summarise_all(function(x) sum(x)/gamesPlayed)
+
+
+# perGameDF <- aggregate(AllStats[,c(5,7)],list(AllStats$Owner), function(x) sum(x)/173)
   perSeasonDF <-  select(AllStats,Owner,Wins,Place,Moves) %>% group_by(Owner) %>% summarise_all(function(x) mean(x))
   countDF <- select(AllStats,Owner,Playoffs,Top_3_Finsh) %>% group_by(Owner) %>% summarise_all(function(x) length(which(x=="Y")))
 #BUILD THE UI********************************************************************************************************************************************
@@ -94,12 +107,15 @@ dbBody <- dashboardBody(
             ),# close fluidRow
             
                     fluidRow(column(6,box(plotOutput("Orig5Place"),title ='A distribution of Final Rankings', solidHeader = TRUE, status = 'success',width = 12)),
-                         column(6, box(tabBox(title = "Per Game and Per Season Metrics", id = "tabSet1", height='400px', width = 12,
-                                 tabPanel("Avg Per Game", "Pts Scored and Diff", h2("blue tab")),
-                                 tabPanel("Avg Per Season","Wins, Rank, and Moves"),
-                                 tabPanel("Top 3 Finishes & Playoffs")
-                                 ), width = 12, solidHeader = TRUE, status = 'primary'))
-                             
+                         column(6, tabBox(title = "", id = "tabSet1", height='400px', width = 12,
+                                 tabPanel("PPG",plotOutput("PPGPlot")),
+                                 tabPanel('Diff/Gm',plotOutput("DiffGMPlot")),
+                                  tabPanel("Wins/Yr",plotOutput("WinsPerSeason")),
+                                 tabPanel('Avg Fin',plotOutput("AvgFinPlot")),
+                                 tabPanel('Moves/Yr',plotOutput("MovesYrPlot")),
+                                 tabPanel("Top 3 Finishes & Playoffs",plotOutput("Top3Plot")))
+                                 
+                                )#closeColumn
                              )#closeFluidRow
                 
                 
@@ -163,7 +179,26 @@ server <- function(input, output){
         
      
         )#close renderplot
-      }
+    
+    output$WinsPerSeason <- renderPlot(
+        ggplot(perSeasonDF, aes(x=perSeasonDF$Owner, y=perSeasonDF$Wins)) + geom_col()+ xlab("") + ylab("")
+        
+    )#close Renderplot
+
+    
+        #####Charts for TabBox######################
+    
+    output$PPGPlot <- renderPlot(
+        ggplot(perGameDF, aes(x=perGameDF$Owner, y= perGameDF$Pts_For, label = perGameDF$Pts_For)) + geom_point(size =10, color = "blue" )+ geom_segment(aes(x=perGameDF$Owner, xend = perGameDF$Owner, y = 0, yend = perGameDF$Pts_For))
+                +theme(panel.background = element_blank(), axis.title.y = element_text(margin = unit(c(0,25,0,0),"mm"), angle = 90)) +xlab("") + ylab("Pts Per Game") + geom_text()
+        
+    )#close Renderplot
+    
+    
+    
+    
+    }# Close Server Function
+
 
 #BUILD THE APP *******************************************************************************************************************************************
 shinyApp (ui,server)
