@@ -4,6 +4,7 @@ library('readxl')
 library('ggplot2')
 library('dplyr')
 library('magrittr')
+library('ggjoy')
 
 #Import Data Step ********************************************************************************************************************************************
 League <- read_excel("FFData_Sep5.xlsx", sheet = "League")
@@ -14,17 +15,21 @@ AllStats <- read_excel("FFData_Sep5.xlsx", sheet = "All")
 #get all #1 draft picks
 g <- subset(Top3Draft,Top3Draft$`Draft Number`==1)
 
-# Some PreProcessing ******************************************************************************************************************************************** 
-AllStats$`Avg Pts For`<- formatC(AllStats$`Avg Pts For`,digits = 0, format = "d", big.mark = ",")
-AllStats$`Avg Pts Against`<- formatC(AllStats$`Avg Pts Against`,digits = 0, format = "d", big.mark = ",")
-AllStats$`Avg Pt Diff` <- formatC(AllStats$`Avg Pt Diff`,digits = 0, format = "d", big.mark = ",")
-AllStats$`Win Percent` <- sprintf("%.0f %%",AllStats$`Win Percent`*100)
-AllStats$`Pts For` <- formatC(AllStats$`Pts For`,digits = 0, format = "d", big.mark = ",")
-AllStats$`Pts Against` <- formatC(AllStats$`Pts Against`,digits = 0, format = "d", big.mark = ",")
+#########Some PreProcessing ********************************************************************************************************************************************
+AllStats$Avg_Pts_For<- formatC(AllStats$Avg_Pts_For,digits = 0, format = "d", big.mark = ",")
+AllStats$Avg_Pts_Against<- formatC(AllStats$Avg_Pts_Against,digits = 0, format = "d", big.mark = ",")
+AllStats$Avg_Pt_Diff <- formatC(AllStats$Avg_Pt_Diff,digits = 0, format = "d", big.mark = ",")
+AllStats$Win_Percent <- sprintf("%.0f %%",AllStats$Win_Percent*100)
+AllStats$Pts_For <- formatC(AllStats$Pts_For,digits = 0, format = "d", big.mark = ",")
+AllStats$Pts_Against <- formatC(AllStats$Pts_Against,digits = 0, format = "d", big.mark = ",")
 
 League$Year <- as.integer(League$Year)
 
 Top3Draft$`Draft Number` <- as.integer(Top3Draft$`Draft Number`)
+
+# Num Games Played since 2004
+gamesPlayed <- 173
+
 
 
 #################################################Create Add'l Tables###################################################################################
@@ -32,13 +37,13 @@ Top3Draft$`Draft Number` <- as.integer(Top3Draft$`Draft Number`)
 
   totalRecordTable <-  select(AllStats,Owner, Wins, Losses, Ties) %>% group_by(Owner) %>%summarise_all(funs(sum)) %>% arrange(desc(Wins))
 totalRecordTableWithWin <- totalRecordTable %>% mutate(Win_Percent = sprintf("%.1f %%",totalRecordTable$Wins/(totalRecordTable$Wins + totalRecordTable$Losses + totalRecordTable$Ties)*100))
-    #totalRecordTable$Wins<- formatC(totalRecordTable$Wins,digits = 0, format = "g")
-    #totalRecordTable$Losses<- formatC(totalRecordTable$Losses,digits = 0, format = "d")
-    #totalRecordTable$Ties<- formatC(totalRecordTable$Ties,digits = 0, format = "d")
-    
-    #totalRecordTable %>% mutate('Win %' = sprintf("%.1f %%",totalRecordTable$Wins/(totalRecordTable$Wins + totalRecordTable$Losses + totalRecordTable$Ties)*100))
-    
+   
+   #per game metrics
 
+ #perGameDF <-  select(AllStats,Owner,Pts_For,Pt_Diff) %>% group_by(Owner) %>% summarise_all(function(x) sum(x))
+                                                                                            
+  perSeasonDF <-  select(AllStats,Owner,Wins,Place,Moves) %>% group_by(Owner) %>% summarise_all(function(x) mean(x))
+  countDF <- select(AllStats,Owner,Playoffs,Top_3_Finsh) %>% group_by(Owner) %>% summarise_all(function(x) length(which(x=="Y")))
 #BUILD THE UI********************************************************************************************************************************************
 
 #configure Header
@@ -88,7 +93,14 @@ dbBody <- dashboardBody(
                 
             ),# close fluidRow
             
-                    fluidRow(box(plotOutput("Orig5Place"),title ='A distribution of Final Rankings', solidHeader = TRUE, status = 'success'))
+                    fluidRow(column(6,box(plotOutput("Orig5Place"),title ='A distribution of Final Rankings', solidHeader = TRUE, status = 'success',width = 12)),
+                         column(6, box(tabBox(title = "Per Game and Per Season Metrics", id = "tabSet1", height='400px', width = 12,
+                                 tabPanel("Avg Per Game", "Pts Scored and Diff", h2("blue tab")),
+                                 tabPanel("Avg Per Season","Wins, Rank, and Moves"),
+                                 tabPanel("Top 3 Finishes & Playoffs")
+                                 ), width = 12, solidHeader = TRUE, status = 'primary'))
+                             
+                             )#closeFluidRow
                 
                 
             )#close 2nd fluid page
@@ -146,7 +158,9 @@ server <- function(input, output){
     output$TotalRecord <- renderTable(totalRecordTableWithWin, align = 'c', digits = 0)
     
     output$Orig5Place <- renderPlot(
-      ggplot(test, aes(x=Place, y=Owner, fill= Owner)) + geom_joy(stat = 'binline',binwidth=1,scale=0.9) + theme_joy() + scale_fill_cyclical(values = c(" navy blue", "light blue"))+ labs(x="Final Ranking")+ theme(axis.title.y = element_blank(), axis.title.x = element_text(family = 'Calibri', size = 12)) + scale_x_discrete(limits = seq(1,12,1))
+      ggplot(test, aes(x=Place, y=Owner, fill= Owner)) + geom_joy(stat = 'binline',binwidth=1,scale=0.9) + theme_joy() + scale_fill_cyclical(values = c(" navy blue", "light blue"))+ 
+        labs(x="Final Ranking")+ theme(axis.title.y = element_blank(), axis.title.x = element_text(family = 'Calibri', size = 12)) + scale_x_discrete(limits = seq(1,12,1))
+        
      
         )#close renderplot
       }
