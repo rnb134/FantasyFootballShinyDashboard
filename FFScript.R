@@ -158,7 +158,7 @@ server <- function(input, output){
     output$TotalRecord <- renderTable(totalRecordTableWithWin, align = 'c', digits = 0)
     
     output$Orig5Place <- renderPlot(
-      ggplot(test, aes(x=Place, y=Owner, fill= Owner)) + geom_joy(stat = 'binline',binwidth=1,scale=0.9) + theme_joy() + scale_fill_cyclical(values = c(" navy blue", "light blue"))+ 
+      ggplot(AllStats, aes(x=Place, y=Owner, fill= Owner)) + geom_joy(stat = 'binline',binwidth=1,scale=0.9) + theme_joy() + scale_fill_cyclical(values = c(" navy blue", "light blue"))+ 
         labs(x="Final Ranking")+ theme(axis.title.y = element_blank(), axis.title.x = element_text(family = 'Calibri', size = 12)) + scale_x_discrete(limits = seq(1,12,1))
         
      
