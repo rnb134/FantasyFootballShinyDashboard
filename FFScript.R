@@ -67,7 +67,8 @@ dbHeader <- dashboardHeader(title = "13 Glorious Years of Fantasy Football", tit
 dbSidebar <- dashboardSidebar(
   sidebarMenu(
     menuItem("League Overview",tabName = 'db1', icon = icon("dashboard")),
-    menuItem("The Original 5", tabName = 'db2', icon = icon("th"))
+    menuItem("The Original 5", tabName = 'db2', icon = icon("th")),
+    menuItem("Thru the Years by Owner", tabName = 'db3', icon = icon("th"))
   )  
 )
 
@@ -81,8 +82,8 @@ dbBody <- dashboardBody(
                     
                     
                 ),#close1stFluidRow
-                          fluidRow(box(plotOutput('Top3Finishes'), title = '# of Top 3 Finishes', solidHeader = TRUE, status = 'primary', width = 6),
-                                   box(plotOutput('Top3DraftPicks'), title ='Top Draft Picks since 2004', solidHeader = TRUE, status ='primary', width = 6, background = 'light-blue'))
+                          fluidRow(column(7,box(plotOutput('Top3Finishes'), title = '# of Top 3 Finishes', solidHeader = TRUE, status = 'primary', width = 12)),
+                                   column(5,box(plotOutput('Top3DraftPicks'), title ='Top Draft Picks since 2004', solidHeader = TRUE, status ='primary', width = 12, background = 'light-blue')))
 
                
                 
@@ -113,7 +114,7 @@ dbBody <- dashboardBody(
                                   tabPanel("Wins/Yr",plotOutput("WinsPerSeason")),
                                  tabPanel('Avg Finish',plotOutput("AvgFinPlot")),
                                  tabPanel('Moves/Yr',plotOutput("MovesYrPlot")),
-                                 tabPanel("Top 3 Finishes & Playoffs",plotOutput("Top3Plot")))
+                                 tabPanel("Playoff Count",plotOutput("Top3Plot")))
                                  
                                 )#closeColumn
                              )#closeFluidRow
@@ -121,12 +122,22 @@ dbBody <- dashboardBody(
                 
             )#close 2nd fluid page
             
-            ) #SecondTabClose
+            ), #SecondTabClose
     
-  )
+    #Third tab open
+    tabItem(tabName = 'db3',h2("Performance By Year"),
+        fluidPage(selectInput("OwnerInput", "Choose Team Owner:", list("B", "Z","Lip","Jose","Jgord")),
+                  fluidRow(box(plotOutput("WinsByYear"), 
+                    title = "Wins By Year", solidHeader = TRUE, status = 'primary', width = 12))
+                           
+                           
+            
+            
+        )  #close 3rd fluid page
+  )#third tab close
   
-)
-
+)#close tabitems
+)#close Body
 
 #pass elements into dashboardPage function and pass to UI Variable
 ui <- dashboardPage(dbHeader,dbSidebar,dbBody)
@@ -153,7 +164,7 @@ server <- function(input, output){
     output$Top3Finishes <- renderPlot(ggplot(Top3Place, aes(x = reorder(Top3Place$'Team Owner', Top3Place$'Team Owner', function(x) length(x)))) + 
                               geom_bar(aes(fill = as.factor(Top3Place$Place)))  + coord_flip()
                     + labs(x="", y = "" ) + theme(panel.background = element_blank()) + geom_text(stat = 'count', aes(label = ..count..), hjust = -2) 
-                     + guides( fill = guide_legend(title = "1st, 2nd, or 3rd", title.hjust = 2))
+                     + guides( fill = guide_legend(title = "1st, 2nd, or 3rd", title.hjust = 2)) + scale_fill_brewer(palette= 'Blues')
     
       
     )#close Render Plot
@@ -202,7 +213,22 @@ server <- function(input, output){
     output$AvgFinPlot <- renderPlot (
         ggplot(perSeasonDF, aes(x = perSeasonDF$Owner, y = perSeasonDF$Place, label = perSeasonDF$Place)) + geom_point(stat = 'identity', size = 10) + ylim(0,12) + coord_flip()
         
-    )#clos
+    )#closeRenderPlot
+    
+    output$MovesYrPlot <- renderPlot(
+        ggplot(perSeasonDF, aes(x =perSeasonDF$Owner, y = perSeasonDF$Moves )) + geom_col() +geom_text(stat = 'identity',aes(label = perSeasonDF$Moves))
+        
+    )# close Render Plot
+    
+    output$Top3Plot <- renderPlot(
+        ggplot(countDF, aes(x =countDF$Owner, y = countDF$Playoffs )) + geom_col() + coord_flip()
+        
+    )# close Render Plot
+    
+    output$WinsByYear <- renderPlot(
+    AllStats %>% filter(Owner == input$OwnerInput) %>% ggplot (aes(x =Year,y = Wins )) + geom_col()
+        #ggplot(subset(AllStats, AllStats$Owner ==input$OwnerInput),aes(x = AllStats$Owner, y = AllStats$Wins)) + geom_col()
+    )
     
     }# Close Server Function
 
