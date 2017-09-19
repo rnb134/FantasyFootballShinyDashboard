@@ -111,7 +111,7 @@ dbBody <- dashboardBody(
                                  tabPanel("PPG",plotOutput("PPGPlot")),
                                  tabPanel('Diff/Gm',plotOutput("DiffGMPlot")),
                                   tabPanel("Wins/Yr",plotOutput("WinsPerSeason")),
-                                 tabPanel('Avg Fin',plotOutput("AvgFinPlot")),
+                                 tabPanel('Avg Finish',plotOutput("AvgFinPlot")),
                                  tabPanel('Moves/Yr',plotOutput("MovesYrPlot")),
                                  tabPanel("Top 3 Finishes & Playoffs",plotOutput("Top3Plot")))
                                  
@@ -194,8 +194,15 @@ server <- function(input, output){
         
     )#close Renderplot
     
+    output$DiffGMPlot <- renderPlot (
+            ggplot(perGameDF, aes(x = perGameDF$Owner, y = perGameDF$Pt_Diff)) + geom_col() + coord_flip()
+            
+        )#closeRenderPlot
     
-    
+    output$AvgFinPlot <- renderPlot (
+        ggplot(perSeasonDF, aes(x = perSeasonDF$Owner, y = perSeasonDF$Place, label = perSeasonDF$Place)) + geom_point(stat = 'identity', size = 10) + ylim(0,12) + coord_flip()
+        
+    )#clos
     
     }# Close Server Function
 
