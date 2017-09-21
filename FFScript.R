@@ -201,7 +201,12 @@ server <- function(input, output){
         )#close renderplot
     
     output$WinsPerSeason <- renderPlot(
-        ggplot(perSeasonDF, aes(x=perSeasonDF$Owner, y=perSeasonDF$Wins)) + geom_col()+ xlab("") + ylab("")
+        
+        
+        ggplot(perSeasonDF, aes(x=perSeasonDF$Owner, y=perSeasonDF$Wins, label = perSeasonDF$Wins)) + geom_col(fill ='dodgerblue3')  + scale_y_continuous(limits=c(0,10), breaks = seq(0,10,1)) 
+        + theme(plot.margin = unit(c(1,1,1,1),"cm"), panel.grid.major.y = element_blank(), panel.border = element_rect(fill =NA, color ='black',size=1.5), panel.grid.major.x = element_blank(), axis.text.x = element_text(size = 14, family ='calibri',face='bold'),  axis.text.y = element_text(size = 14, family ='calibri',face='bold'),
+                axis.title.y = element_text(size = 18, family ='calibri', face ='bold', margin = unit(c(0,12,0,0),"mm"))) + xlab("") + ylab("Wins per Year")
+        + geom_text(aes(label = sprintf("%.1f",perSeasonDF$Wins),vjust =-1),size =6, color = 'black')
         
     )#close Renderplot
 
@@ -212,7 +217,7 @@ server <- function(input, output){
         ggplot(perGameDF, aes(x=perGameDF$Owner, y= perGameDF$Pts_For, label = perGameDF$Pts_For)) + geom_point(size =12, fill = "dodgerblue3", shape =21, color = 'red' )+ geom_segment(aes(x=perGameDF$Owner, xend = perGameDF$Owner, y = 0, yend = perGameDF$Pts_For - 5), size =1.0)
                 +theme( panel.border = element_rect(fill = NA, color='black',size=1.5), panel.grid.major.x = element_blank(),plot.margin = unit(c(1,1,1,1),"cm"), axis.title.y = element_text(margin = unit(c(0,12,0,0),"mm"),  angle = 90, size =18, family = 'Calibri', face = 'bold')
                        , axis.text.x = element_text(family = 'calibri', size = 14, face ='bold'),axis.text.y = element_text(size =14, family ='calibri', face ='bold'), axis.ticks.y = element_blank()) 
-        +xlab("") + ylab("Pts Per Game") + geom_text(aes(label = format(perGameDF$Pts_For, digits = 3),vjust = -2),size =6) +scale_y_discrete(limit =c(25,50,75,100,125,150)) + coord_cartesian(ylim = c(0,150))
+        +xlab("") + ylab("Pts Per Game") + geom_text(aes(label = sprintf("%.1f",perGameDF$Pts_For),vjust = -2),size =6) +scale_y_discrete(limit =c(25,50,75,100,125,150)) + coord_cartesian(ylim = c(0,150))
         
     )#close Renderplot
     
@@ -220,21 +225,40 @@ server <- function(input, output){
             ggplot(perGameDF, aes(x = perGameDF$Owner, y = perGameDF$Pt_Diff, label = perGameDF$Pt_Diff)) + geom_col(fill ='dodgerblue3')  + scale_y_continuous(limits=c(-3,6), breaks = seq(-3,6,1)) + coord_flip() 
             + theme(plot.margin = unit(c(1,1,1,0),"cm"), panel.grid.major.y = element_blank(), panel.border = element_rect(fill =NA, color ='black',size=1.5), panel.grid.major.x = element_blank(), axis.text.x = element_text(size = 14, family ='calibri',face='bold'),  axis.text.y = element_text(size = 14, family ='calibri',face='bold'),
                     axis.title.x = element_text(size = 18, family ='calibri', face ='bold', margin = unit(c(1,0,-0.5,0),"cm"))) + xlab("") + ylab("Pt Difference Per Game")
-                    + geom_text(aes(label = format(perGameDF$Pt_Diff, digits = 3),hjust =ifelse(Pt_Diff>0,-0.25,1.5)),size =6, color = 'black')
+                    + geom_text(aes(label = sprintf("%.1f",perGameDF$Pt_Diff),hjust =ifelse(Pt_Diff>0,-0.25,1.5)),size =6, color = 'black')
         )#closeRenderPlot
     
     output$AvgFinPlot <- renderPlot (
-        ggplot(perSeasonDF, aes(x = perSeasonDF$Owner, y = perSeasonDF$Place, label = perSeasonDF$Place)) + geom_point(stat = 'identity', size = 10) + ylim(0,12) + coord_flip()
+       # ggplot(perSeasonDF, aes(x = perSeasonDF$Owner, y = perSeasonDF$Place, label = perSeasonDF$Place)) + geom_point(stat = 'identity', size = 10) + ylim(0,12) + coord_flip()
+        
+        ggplot(perSeasonDF, aes(x=perSeasonDF$Owner, y=perSeasonDF$Place, label = perSeasonDF$Place)) + geom_point(stat = 'identity',fill ='dodgerblue3', shape = 23, color = 'red',size = 10)  + scale_y_continuous(limits=c(0,10), breaks = seq(0,10,1)) 
+        + theme(plot.margin = unit(c(1,1,1,1),"cm"), panel.grid.major.y = element_blank(), panel.border = element_rect(fill =NA, color ='black',size=1.5), panel.grid.major.x = element_blank(), axis.text.x = element_text(size = 14, family ='calibri',face='bold'),  axis.text.y = element_text(size = 14, family ='calibri',face='bold'),
+                axis.title.y = element_text(size = 18, family ='calibri', face ='bold', margin = unit(c(0,12,0,0),"mm"))) + xlab("") + ylab("Average Finish")
+        + geom_text(aes(label = sprintf("%.1f",perSeasonDF$Place),vjust =-1.5),size =6, color = 'black')
+        
+        
         
     )#closeRenderPlot
     
     output$MovesYrPlot <- renderPlot(
-        ggplot(perSeasonDF, aes(x =perSeasonDF$Owner, y = perSeasonDF$Moves )) + geom_col() +geom_text(stat = 'identity',aes(label = perSeasonDF$Moves))
+        #ggplot(perSeasonDF, aes(x =perSeasonDF$Owner, y = perSeasonDF$Moves )) + geom_col() +geom_text(stat = 'identity',aes(label = perSeasonDF$Moves))
+        
+        
+        ggplot(perSeasonDF, aes(x=perSeasonDF$Owner, y=perSeasonDF$Moves, label = perSeasonDF$Moves)) + geom_col(fill ='dodgerblue3')  + scale_y_continuous(limits=c(0,40), breaks = seq(0,40,10)) 
+        + theme(plot.margin = unit(c(1,1,1,1),"cm"), panel.grid.major.y = element_blank(), panel.border = element_rect(fill =NA, color ='black',size=1.5), panel.grid.major.x = element_blank(), axis.text.x = element_text(size = 14, family ='calibri',face='bold'),  axis.text.y = element_text(size = 14, family ='calibri',face='bold'),
+                axis.title.y = element_text(size = 18, family ='calibri', face ='bold', margin = unit(c(0,12,0,0),"mm"))) + xlab("") + ylab("Transactions Per Year")
+        + geom_text(aes(label = sprintf("%.1f",perSeasonDF$Moves),vjust =-1.5),size =6, color = 'black')
         
     )# close Render Plot
     
     output$Top3Plot <- renderPlot(
-        ggplot(countDF, aes(x =countDF$Owner, y = countDF$Playoffs )) + geom_col() + coord_flip()
+       # ggplot(countDF, aes(x =countDF$Owner, y = countDF$Playoffs )) + geom_col() + coord_flip()
+        
+        ggplot(countDF, aes(x=countDF$Owner, y=countDF$Playoffs, label = countDF$Playoffs)) + geom_col(fill ='dodgerblue3')  + scale_y_continuous(limits=c(0,10), breaks = seq(0,10,1)) 
+        + theme(plot.margin = unit(c(1,1,1,0),"cm"), panel.grid.major.y = element_blank(), panel.border = element_rect(fill =NA, color ='black',size=1.5), panel.grid.major.x = element_blank(), axis.text.x = element_text(size = 14, family ='calibri',face='bold'),  axis.text.y = element_text(size = 14, family ='calibri',face='bold'),
+                axis.title.x = element_text(size = 18, family ='calibri', face ='bold', margin = unit(c(1,0,-0.5,0),"cm"))) + xlab("") + ylab("Times in Playoffs")
+        + geom_text(aes(label = sprintf("%.0f",countDF$Playoffs),hjust =-1.5),size =6, color = 'black') + coord_flip()
+        
         
     )# close Render Plot
     
