@@ -217,7 +217,7 @@ server <- function(input, output){
     )#close Renderplot
     
     output$DiffGMPlot <- renderPlot (
-            ggplot(perGameDF, aes(x = perGameDF$Owner, y = perGameDF$Pt_Diff, label = perGameDF$Pt_Diff)) + geom_col(fill ='dodgerblue3')  + scale_y_continuous(limits=c(-3,6)) + coord_flip() 
+            ggplot(perGameDF, aes(x = perGameDF$Owner, y = perGameDF$Pt_Diff, label = perGameDF$Pt_Diff)) + geom_col(fill ='dodgerblue3')  + scale_y_continuous(limits=c(-3,6), breaks = seq(-3,6,1)) + coord_flip() 
             + theme(plot.margin = unit(c(1,1,1,0),"cm"), panel.grid.major.y = element_blank(), panel.border = element_rect(fill =NA, color ='black',size=1.5), panel.grid.major.x = element_blank(), axis.text.x = element_text(size = 14, family ='calibri',face='bold'),  axis.text.y = element_text(size = 14, family ='calibri',face='bold'),
                     axis.title.x = element_text(size = 18, family ='calibri', face ='bold', margin = unit(c(1,0,-0.5,0),"cm"))) + xlab("") + ylab("Pt Difference Per Game")
                     + geom_text(aes(label = format(perGameDF$Pt_Diff, digits = 3),hjust =ifelse(Pt_Diff>0,-0.25,1.5)),size =6, color = 'black')
