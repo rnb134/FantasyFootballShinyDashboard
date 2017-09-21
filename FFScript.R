@@ -72,7 +72,7 @@ dbSidebar <- dashboardSidebar(
     menuItem("League Overview",tabName = 'db1', icon = icon("dashboard")),
     menuItem("The Original 5", tabName = 'db2', icon = icon("bar-chart")),
     menuItem("Thru the Years by Owner", tabName = 'db3', icon = icon("th")),
-    menuItem("The Best Team Names", tabName ='db4',icon =icon("th"))
+    menuItem("The Best Team Names", tabName ='db4',icon =icon("trophy"))
   )  
 )
 
@@ -307,7 +307,7 @@ server <- function(input, output){
 
         output$WordCloud <- renderWordcloud2 ( 
             {
-            wordcloud2(bestNames, size =1, color ='random-light')
+            wordcloud2(bestNames, size =0.4, color ='random-dark')
             }
         )
      
