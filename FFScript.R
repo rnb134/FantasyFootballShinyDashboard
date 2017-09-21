@@ -21,10 +21,10 @@ g <- subset(Top3Draft,Top3Draft$`Draft Number`==1)
 
 #AllStats$Pts_For <- format(round(AllStats$Pts_For,0),nsmall = 0, format= "d", big.mark = ",")
 
-AllStats$Pts_For <- as.integer(as.character(AllStats$Pts_For))
+#AllStats$Pts_For <- as.integer(as.character(AllStats$Pts_For))
 AllStats$Pt_Diff <- as.integer(AllStats$Pt_Diff)
 
-AllStats$Avg_Pts_For<- formatC(AllStats$Avg_Pts_For,digits = 0, format = "f", big.mark = ",")
+#AllStats$Avg_Pts_For<- formatC(AllStats$Avg_Pts_For,digits = 0, format = "d", big.mark = ",")
 AllStats$Avg_Pts_Against<- formatC(AllStats$Avg_Pts_Against,digits = 0, format = "d", big.mark = ",")
 AllStats$Avg_Pt_Diff <- formatC(AllStats$Avg_Pt_Diff,digits = 0, format = "d", big.mark = ",")
 AllStats$Win_Percent <- sprintf("%.0f %%",AllStats$Win_Percent*100)
@@ -32,6 +32,7 @@ AllStats$Win_Percent <- sprintf("%.0f %%",AllStats$Win_Percent*100)
 AllStats$Pts_Against <- formatC(AllStats$Pts_Against,digits = 0, format = "d", big.mark = ",")
 
 League$Year <- as.integer(League$Year)
+AllStats$Avg_Pts_For <- as.integer(AllStats$Avg_Pts_For)
 
 
 
@@ -67,7 +68,7 @@ dbHeader <- dashboardHeader(title = "13 Glorious Years of Fantasy Football", tit
 dbSidebar <- dashboardSidebar(
   sidebarMenu(
     menuItem("League Overview",tabName = 'db1', icon = icon("dashboard")),
-    menuItem("The Original 5", tabName = 'db2', icon = icon("th")),
+    menuItem("The Original 5", tabName = 'db2', icon = icon("bar-chart")),
     menuItem("Thru the Years by Owner", tabName = 'db3', icon = icon("th"))
   )  
 )
@@ -263,24 +264,40 @@ server <- function(input, output){
     )# close Render Plot
     
     output$WinsByYear <- renderPlot(
-    AllStats %>% filter(Owner == input$OwnerInput) %>% ggplot (aes(x =Year,y = Wins )) + geom_col()
+    AllStats %>% filter(Owner == input$OwnerInput) %>% ggplot (aes(x =Year,y = Wins )) 
+   + geom_col(fill ='dodgerblue3')  + scale_y_continuous(limits=c(0,20), breaks = seq(0,20,5)) 
+    + theme(plot.margin = unit(c(1,1,1,1),"cm"), panel.grid.minor.x = element_blank(), panel.border = element_rect(fill =NA, color ='black',size=1.5), panel.grid.major.x = element_blank(), axis.text.x = element_text(size = 14, family ='calibri',face='bold'),  axis.text.y = element_text(size = 14, family ='calibri',face='bold'),
+            axis.title.y = element_text(size = 18, family ='calibri', face ='bold', margin = unit(c(0,12,0,0),"mm"))) + xlab("") + ylab("Number of Wins")
+    + geom_text(aes(label = sprintf("%.f",Wins),vjust =-1),size =6, color = 'black') + scale_x_continuous(breaks = AllStats$Year)
         
+    
     )# close Render plot
     
     output$RankByYear <- renderPlot(
-        AllStats %>% filter(Owner == input$OwnerInput) %>% ggplot (aes(x =Year,y = Place )) + geom_col()
+   
+        
+            AllStats %>% filter(Owner == input$OwnerInput) %>% ggplot (aes(x =Year,y = Place )) 
+            + geom_col(fill ='dodgerblue3')  + scale_y_continuous(limits=c(0,13), breaks = seq(0,12,1)) 
+            + theme(plot.margin = unit(c(1,1,1,1),"cm"), panel.grid.minor.x = element_blank(),panel.grid.major.y = element_blank(), panel.border = element_rect(fill =NA, color ='black',size=1.5), panel.grid.major.x = element_blank(), axis.text.x = element_text(size = 14, family ='calibri',face='bold'),  axis.text.y = element_text(size = 14, family ='calibri',face='bold'),
+                    axis.title.y = element_text(size = 18, family ='calibri', face ='bold', margin = unit(c(0,12,0,0),"mm"))) + xlab("") + ylab("Final Ranking")
+            + geom_text(aes(label = sprintf("%.f",Place),vjust =-1),size =6, color = 'black') + scale_x_continuous(breaks = AllStats$Year) + coord_cartesian(ylim = c(0,13))
+            
         
     )# close Render plot
+   
     
-    
-    output$PPGByYear <- renderPlot(
-        AllStats %>% filter(Owner == input$OwnerInput) %>% ggplot (aes(x =Year,y = Avg_Pts_For )) + geom_col()
-        
+     output$PPGByYear <- renderPlot(
+         AllStats %>% filter(Owner == input$OwnerInput) %>% ggplot (aes(x =Year,y = Avg_Pts_For ))
+         + geom_col(fill ='dodgerblue3')  + scale_y_continuous(limits=c(0,150), breaks = seq(0,150,25))
+         + theme(plot.margin = unit(c(1,1,1,1),"cm"), panel.grid.minor.x = element_blank(),panel.grid.major.y = element_blank(), panel.border = element_rect(fill =NA, color ='black',size=1.5), panel.grid.major.x = element_blank(), axis.text.x = element_text(size = 14, family ='calibri',face='bold'),  axis.text.y = element_text(size = 14, family ='calibri',face='bold'),
+                 axis.title.y = element_text(size = 18, family ='calibri', face ='bold', margin = unit(c(0,12,0,0),"mm"))) + xlab("") + ylab("Pts Per Game")
+         + geom_text(aes(label = sprintf("%.f",Avg_Pts_For),vjust =-1),size =6, color = 'black') + scale_x_continuous(breaks = AllStats$Year)
+
     )# close Render plot
-    
+
     
     }# Close Server Function
 
-
+str(AllStats)
 #BUILD THE APP *******************************************************************************************************************************************
 shinyApp (ui,server)
