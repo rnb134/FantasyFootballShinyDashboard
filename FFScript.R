@@ -94,7 +94,7 @@ dbBody <- dashboardBody(
     
     #SecondTab Open
     tabItem(tabName = 'db2',h2("The Original 5"),
-            fluidPage(fluidRow(column(3, box(tableOutput('TotalRecord'), title = 'Record since 2004', solidHeader = TRUE, status ='success',width = 12 )),
+            fluidPage(fluidRow(column(3, box(tableOutput('TotalRecord'), title = 'Record since 2004', solidHeader = TRUE, status ='primary',width = 12 )),
                               column(9,infoBox("Jgord","52.6% Win Rate", subtitle = "91-79-3", icon = icon('thumbs-up'), color ='light-blue'),
                                      infoBox("Jose","52.6% Win Rate", subtitle = "91-81-1", icon = icon('thumbs-up'), color ='lime'),
                                      infoBox("Lip","50.9% Win Rate", subtitle = "88-84-1", icon = icon('thumbs-up'), color ='orange'),
@@ -107,7 +107,7 @@ dbBody <- dashboardBody(
                 
             ),# close fluidRow
             
-                    fluidRow(column(6,box(plotOutput("Orig5Place"),title ='A distribution of Final Rankings', solidHeader = TRUE, status = 'success',width = 12)),
+                    fluidRow(column(6,box(plotOutput("Orig5Place"),title ='A distribution of Final Rankings', solidHeader = TRUE, status = 'primary',width = 12)),
                          column(6, tabBox(title = "", id = "tabSet1", height='400px', width = 12,
                                  tabPanel("PPG",plotOutput("PPGPlot")),
                                  tabPanel('Diff/Gm',plotOutput("DiffGMPlot")),
@@ -128,9 +128,13 @@ dbBody <- dashboardBody(
     tabItem(tabName = 'db3',h2("Performance By Year"),
         fluidPage(selectInput("OwnerInput", "Choose Team Owner:", list("B", "Z","Lip","Jose","Jgord")),
                   fluidRow(box(plotOutput("WinsByYear"), 
-                    title = "Wins By Year", solidHeader = TRUE, status = 'primary', width = 12))
+                    title = "Wins By Year", solidHeader = TRUE, status = 'primary', width = 12)),
+                  
+                  fluidRow(box(plotOutput("RankByYear"), 
+                               title = "Ranking By Year", solidHeader = TRUE, status = 'primary', width = 12)),
                            
-                           
+                  fluidRow(box(plotOutput("PPGByYear"), 
+                               title = "PPG By Year", solidHeader = TRUE, status = 'primary', width = 12))       
             
             
         )  #close 3rd fluid page
@@ -153,9 +157,9 @@ server <- function(input, output){
     
     #League Graph
     output$LeagueWinners <- renderPlot(
-        ggplot(League, aes(x=reorder(League$`Winner (owner)`,League$`Winner (owner)`, function(x)-length(x)))) + geom_bar(color = "blue", fill = "gray") + labs(x ="",y="")
-        +theme(axis.text.x = element_text(size = 16, angle = 45), panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank()) +
-        geom_text(stat='count', aes(label = ..count..), vjust =-1) + scale_y_discrete()
+        ggplot(League, aes(x=reorder(League$`Winner (owner)`,League$`Winner (owner)`, function(x)-length(x)))) + geom_bar(color = "blue", fill = "dodgerblue3") + labs(x ="",y="")
+        +theme(axis.text.x = element_text(size = 16, angle = 45, family = 'calibri', face = 'bold'), panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank()) +
+        geom_text(stat='count', aes(label = ..count..), vjust =-1, face = 'bold', family = 'calibri', size = 6) + scale_y_discrete()
         , width = 'auto', height = 'auto'
         
     )#closeRenderplot
@@ -171,9 +175,9 @@ server <- function(input, output){
     
     #Top3 Draft Picks Graph
     output$Top3DraftPicks <- renderPlot(
-        ggplot(g, aes(x=reorder(g$`Draft Pick`,g$`Draft Pick`, function(x)-length(x)))) + geom_bar(color = "blue", fill = "gray") + labs(x ="",y="")
-        +theme(axis.text.x = element_text(size = 12, angle = 45), panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank()) +
-            geom_text(stat='count', aes(label = ..count..), vjust =-1) + scale_y_discrete()
+        ggplot(g, aes(x=reorder(g$`Draft Pick`,g$`Draft Pick`, function(x)-length(x)))) + geom_bar(color = "blue", fill = "dodgerblue3") + labs(x ="",y="")
+        +theme(axis.text.x = element_text(size = 12, angle = 90, family = 'calibri', face = 'bold'), panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank()) +
+            geom_text(stat='count', aes(label = ..count..), vjust =-1, face = 'bold', family = 'calibri', size = 6) + scale_y_discrete()
         , width = 'auto', height = 'auto'
         
     )#closeRenderplot
@@ -227,8 +231,20 @@ server <- function(input, output){
     
     output$WinsByYear <- renderPlot(
     AllStats %>% filter(Owner == input$OwnerInput) %>% ggplot (aes(x =Year,y = Wins )) + geom_col()
-        #ggplot(subset(AllStats, AllStats$Owner ==input$OwnerInput),aes(x = AllStats$Owner, y = AllStats$Wins)) + geom_col()
-    )
+        
+    )# close Render plot
+    
+    output$RankByYear <- renderPlot(
+        AllStats %>% filter(Owner == input$OwnerInput) %>% ggplot (aes(x =Year,y = Place )) + geom_col()
+        
+    )# close Render plot
+    
+    
+    output$PPGByYear <- renderPlot(
+        AllStats %>% filter(Owner == input$OwnerInput) %>% ggplot (aes(x =Year,y = Avg_Pts_For )) + geom_col()
+        
+    )# close Render plot
+    
     
     }# Close Server Function
 
