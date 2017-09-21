@@ -5,12 +5,14 @@ library('ggplot2')
 library('dplyr')
 library('magrittr')
 library('ggjoy')
+library('wordcloud2')
 
 #Import Data Step ********************************************************************************************************************************************
 League <- read_excel("FFData_Sep5.xlsx", sheet = "League")
 Top3Place <- read_excel("FFData_Sep5.xlsx", sheet = "Top3Place")
 Top3Draft <- read_excel("FFData_Sep5.xlsx", sheet = "Top3Draft")
 AllStats <- read_excel("FFData_Sep5.xlsx", sheet = "All")
+bestNames <- read_excel("FFData_Sep5.xlsx", sheet = "Names")
 
 #get all #1 draft picks
 g <- subset(Top3Draft,Top3Draft$`Draft Number`==1)
@@ -69,7 +71,8 @@ dbSidebar <- dashboardSidebar(
   sidebarMenu(
     menuItem("League Overview",tabName = 'db1', icon = icon("dashboard")),
     menuItem("The Original 5", tabName = 'db2', icon = icon("bar-chart")),
-    menuItem("Thru the Years by Owner", tabName = 'db3', icon = icon("th"))
+    menuItem("Thru the Years by Owner", tabName = 'db3', icon = icon("th")),
+    menuItem("The Best Team Names", tabName ='db4',icon =icon("th"))
   )  
 )
 
@@ -140,9 +143,16 @@ dbBody <- dashboardBody(
             
             
         )  #close 3rd fluid page
-  )#third tab close
+  ),#third tab close
+  
+     tabItem(tabName ='db4',h2("Team Names"),
+                    fluidPage(fluidRow(box(wordcloud2Output("WordCloud"), solidHeader = TRUE, status = 'primary', width =12)))
+             
+             
+             )#4th Table Close
   
 )#close tabitems
+
 )#close Body
 
 #pass elements into dashboardPage function and pass to UI Variable
@@ -235,7 +245,7 @@ server <- function(input, output){
         ggplot(perSeasonDF, aes(x=perSeasonDF$Owner, y=perSeasonDF$Place, label = perSeasonDF$Place)) + geom_point(stat = 'identity',fill ='dodgerblue3', shape = 23, color = 'red',size = 10)  + scale_y_continuous(limits=c(0,10), breaks = seq(0,10,1)) 
         + theme(plot.margin = unit(c(1,1,1,1),"cm"), panel.grid.major.y = element_blank(), panel.border = element_rect(fill =NA, color ='black',size=1.5), panel.grid.major.x = element_blank(), axis.text.x = element_text(size = 14, family ='calibri',face='bold'),  axis.text.y = element_text(size = 14, family ='calibri',face='bold'),
                 axis.title.y = element_text(size = 18, family ='calibri', face ='bold', margin = unit(c(0,12,0,0),"mm"))) + xlab("") + ylab("Average Finish")
-        + geom_text(aes(label = sprintf("%.1f",perSeasonDF$Place),vjust =-1.5),size =5,family ='calibri',face='bold',)
+        + geom_text(aes(label = sprintf("%.1f",perSeasonDF$Place),vjust =-1.5),size =5,family ='calibri',face='bold')
         
         
         
@@ -248,7 +258,7 @@ server <- function(input, output){
         ggplot(perSeasonDF, aes(x=perSeasonDF$Owner, y=perSeasonDF$Moves, label = perSeasonDF$Moves)) + geom_col(fill ='dodgerblue3')  + scale_y_continuous(limits=c(0,40), breaks = seq(0,40,10)) 
         + theme(plot.margin = unit(c(1,1,1,1),"cm"), panel.grid.major.y = element_blank(), panel.border = element_rect(fill =NA, color ='black',size=1.5), panel.grid.major.x = element_blank(), axis.text.x = element_text(size = 14, family ='calibri',face='bold'),  axis.text.y = element_text(size = 14, family ='calibri',face='bold'),
                 axis.title.y = element_text(size = 18, family ='calibri', face ='bold', margin = unit(c(0,12,0,0),"mm"))) + xlab("") + ylab("Transactions Per Year")
-        + geom_text(aes(label = sprintf("%.1f",perSeasonDF$Moves),vjust =-1.5),size =5,family ='calibri',face='bold',)
+        + geom_text(aes(label = sprintf("%.1f",perSeasonDF$Moves),vjust =-1.5),size =5,family ='calibri',face='bold')
         
     )# close Render Plot
     
@@ -295,6 +305,12 @@ server <- function(input, output){
 
     )# close Render plot
 
+        output$WordCloud <- renderWordcloud2 ( 
+            {
+            wordcloud2(bestNames, size =1, color ='random-light')
+            }
+        )
+     
     
     }# Close Server Function
 
