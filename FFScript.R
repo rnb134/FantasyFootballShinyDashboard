@@ -146,7 +146,7 @@ dbBody <- dashboardBody(
   ),#third tab close
   
      tabItem(tabName ='db4',h2("Team Names"),
-                    fluidPage(fluidRow(box(wordcloud2Output("WordCloud"), solidHeader = TRUE, status = 'primary', width =12)))
+                    fluidPage(fluidRow(box(wordcloud2Output("WordCloud"), title ='The Best Team Names', solidHeader = TRUE, status = 'primary', width =12)))
              
              
              )#4th Table Close
