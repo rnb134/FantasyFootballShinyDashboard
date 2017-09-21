@@ -107,7 +107,7 @@ dbBody <- dashboardBody(
                 
             ),# close fluidRow
             
-                    fluidRow(column(6,box(plotOutput("Orig5Place"),title ='A distribution of Final Rankings', solidHeader = TRUE, status = 'primary',width = 12)),
+                    fluidRow(column(6,box(plotOutput("Orig5Place"),title ='A distribution of Final Rankings', solidHeader = TRUE, status = 'primary',width = 12, background = 'light-blue')),
                          column(6, tabBox(title = "", id = "tabSet1", height='400px', width = 12,
                                  tabPanel("PPG",plotOutput("PPGPlot")),
                                  tabPanel('Diff/Gm',plotOutput("DiffGMPlot")),
@@ -116,7 +116,8 @@ dbBody <- dashboardBody(
                                  tabPanel('Moves/Yr',plotOutput("MovesYrPlot")),
                                  tabPanel("Playoff Count",plotOutput("Top3Plot")))
                                  
-                                )#closeColumn
+                                )#closeColumn,
+                       
                              )#closeFluidRow
                 
                 
@@ -158,7 +159,7 @@ server <- function(input, output){
     #League Graph
     output$LeagueWinners <- renderPlot(
         ggplot(League, aes(x=reorder(League$`Winner (owner)`,League$`Winner (owner)`, function(x)-length(x)))) + geom_bar(color = "blue", fill = "dodgerblue3") + labs(x ="",y="")
-        +theme(axis.text.x = element_text(size = 16, angle = 45, family = 'calibri', face = 'bold'), panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank()) +
+        +theme(axis.text.x = element_text(size = 16, angle = 45, family = 'calibri', face = 'bold'), panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(), axis.ticks.x = element_blank()) +
         geom_text(stat='count', aes(label = ..count..), vjust =-1, face = 'bold', family = 'calibri', size = 6) + scale_y_discrete()
         , width = 'auto', height = 'auto'
         
@@ -167,8 +168,9 @@ server <- function(input, output){
     #Top3Finishes Graph
     output$Top3Finishes <- renderPlot(ggplot(Top3Place, aes(x = reorder(Top3Place$'Team Owner', Top3Place$'Team Owner', function(x) length(x)))) + 
                               geom_bar(aes(fill = as.factor(Top3Place$Place)))  + coord_flip()
-                    + labs(x="", y = "" ) + theme(panel.background = element_blank()) + geom_text(stat = 'count', aes(label = ..count..), hjust = -2) 
-                     + guides( fill = guide_legend(title = "1st, 2nd, or 3rd", title.hjust = 2)) + scale_fill_brewer(palette= 'Blues')
+                    + labs(x="", y = "" ) + theme(panel.background = element_blank(), axis.text.y = element_text(size =14, family = 'calibri'), axis.text.x = element_blank(), axis.ticks.x = element_blank(), legend.text = element_text(size = 14), legend.title = element_text(size = 16))
+                    + geom_text(stat = 'count', aes(label = ..count..), hjust = -2, family = 'calibri', size =6, family = 'bold') 
+                     + guides( fill = guide_legend(title = "1st, 2nd, or 3rd", label.position = 'right')) + scale_fill_brewer(palette= 'Blues')
     
       
     )#close Render Plot
@@ -176,7 +178,7 @@ server <- function(input, output){
     #Top3 Draft Picks Graph
     output$Top3DraftPicks <- renderPlot(
         ggplot(g, aes(x=reorder(g$`Draft Pick`,g$`Draft Pick`, function(x)-length(x)))) + geom_bar(color = "blue", fill = "dodgerblue3") + labs(x ="",y="")
-        +theme(axis.text.x = element_text(size = 12, angle = 90, family = 'calibri', face = 'bold'), panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank()) +
+        +theme(axis.text.x = element_text(size = 12, angle = 90, family = 'calibri', face = 'bold'), panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(), axis.ticks.x = element_blank()) +
             geom_text(stat='count', aes(label = ..count..), vjust =-1, face = 'bold', family = 'calibri', size = 6) + scale_y_discrete()
         , width = 'auto', height = 'auto'
         
@@ -189,8 +191,11 @@ server <- function(input, output){
     output$TotalRecord <- renderTable(totalRecordTableWithWin, align = 'c', digits = 0)
     
     output$Orig5Place <- renderPlot(
-      ggplot(AllStats, aes(x=Place, y=Owner, fill= Owner)) + geom_joy(stat = 'binline',binwidth=1,scale=0.9) + theme_joy() + scale_fill_cyclical(values = c(" navy blue", "light blue"))+ 
-        labs(x="Final Ranking")+ theme(axis.title.y = element_blank(), axis.title.x = element_text(family = 'Calibri', size = 12)) + scale_x_discrete(limits = seq(1,12,1))
+      ggplot(AllStats, aes(x=Place, y=Owner, fill= Owner)) + geom_joy(stat = 'binline',binwidth=1,scale=0.9) + theme_joy() + scale_fill_cyclical(values = c(" navy blue", "dodgerblue3"))+ 
+        labs(x="Final Ranking")
+      + theme(axis.title.y = element_blank(), axis.title.x = element_text(family = 'Calibri', size = 16, face = 'italic'), axis.text.x = element_text(size = 14, family = 'calibri', face = 'bold')
+              , axis.text.y = element_text(size = 14, family ='calibri',face='bold'), panel.background = element_blank(), panel.grid  = element_blank())
+      + scale_x_discrete(limits = seq(1,12,1)) 
         
      
         )#close renderplot
@@ -202,10 +207,12 @@ server <- function(input, output){
 
     
         #####Charts for TabBox######################
-    
+    # plot.background = element_rect(fill = 'gray92'),
     output$PPGPlot <- renderPlot(
-        ggplot(perGameDF, aes(x=perGameDF$Owner, y= perGameDF$Pts_For, label = perGameDF$Pts_For)) + geom_point(size =10, color = "blue" )+ geom_segment(aes(x=perGameDF$Owner, xend = perGameDF$Owner, y = 0, yend = perGameDF$Pts_For))
-                +theme(panel.background = element_blank(), axis.title.y = element_text(margin = unit(c(0,25,0,0),"mm"), angle = 90)) +xlab("") + ylab("Pts Per Game") + geom_text()
+        ggplot(perGameDF, aes(x=perGameDF$Owner, y= perGameDF$Pts_For, label = perGameDF$Pts_For)) + geom_point(size =12, fill = "dodgerblue3", shape =21, color = 'red' )+ geom_segment(aes(x=perGameDF$Owner, xend = perGameDF$Owner, y = 0, yend = perGameDF$Pts_For - 5), size =1.0)
+                +theme( panel.border = element_rect(fill = NA, color='black',size=1.5), panel.grid.major.x = element_blank(),plot.margin = unit(c(1,1,1,1),"cm"), axis.title.y = element_text(margin = unit(c(0,12,0,0),"mm"),  angle = 90, size =18, family = 'Calibri', face = 'bold')
+                       , axis.text.x = element_text(family = 'calibri', size = 14, face ='bold'),axis.text.y = element_text(size =14, family ='calibri', face ='bold'), axis.ticks.y = element_blank()) 
+        +xlab("") + ylab("Pts Per Game") + geom_text(aes(label = format(perGameDF$Pts_For, digits = 3),vjust = -2),size =6) +scale_y_discrete(limit =c(25,50,75,100,125,150)) + coord_cartesian(ylim = c(0,150))
         
     )#close Renderplot
     
