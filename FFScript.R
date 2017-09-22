@@ -164,7 +164,7 @@ server <- function(input, output){
     ################################# TAB #1 SERVER#####################################################################################
     
     #League Table
-    output$LeagueOverview <- renderTable(League, align = 'c', width = 'auto')
+    output$LeagueOverview <- renderTable(League[,-c(5)], align = 'c', width = 'auto')
   #output$LeagueOverview <- renderDataTable(League, options = list(ScrollY = '800px', pageLength = 1000))
     
     #League Graph
